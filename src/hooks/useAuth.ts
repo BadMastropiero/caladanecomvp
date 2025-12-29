@@ -19,7 +19,7 @@ const useAuth = () => {
     const payload = unwrapApiData(data);
     // Perform login logic, set user data
     const token = payload?.access_token || payload?.authToken || "";
-    const { access_token: _accessToken, authToken: _authToken, ...rest } = payload || {};
+    const { access_token: accessTokenToExclude, authToken: authTokenToExclude, ...rest } = payload || {};
     setUser(payload?.user || { ...rest });
     if (token) {
       setIsAuthenticated(true);
