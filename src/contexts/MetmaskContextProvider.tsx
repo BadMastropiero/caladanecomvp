@@ -97,8 +97,8 @@ const MetmaskContextProvider: React.FC<{
             await mm.activate();
           }
         }
-      } catch (_e) {
-        // no-op
+      } catch (e) {
+        console.error("Failed to eagerly connect wallet:", e);
       }
     };
 
