@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "node ./app.js"
+    "start": "node ./app.js",
+    "test": "NODE_ENV=test jest"
   },
   "dependencies": {
     "adm-zip": "^0.5.10",
@@ -51,6 +52,18 @@
     "validate-phone-number-node-js": "0.0.1",
     "xlsx": "^0.18.5",
     "xrpl": "^3.1.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ]
   },
   "description": ""
 }
