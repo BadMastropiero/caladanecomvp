@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Fragment, useContext, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useWeb3React } from "@web3-react/core";
 
 import { ReactComponent as GoogleButton } from "../../assets/images/GoogleButton.svg";
 import { postApi } from "../../services/axios.service";
@@ -10,6 +11,7 @@ import { ActionTypes, AuthContext } from "../../contexts/AuthContext";
 
 const Register = () => {
   const { toggleModal, updateAuthAction } = useContext(AuthContext);
+  const { account, provider } = useWeb3React();
   const {
     register,
     handleSubmit,
@@ -30,11 +32,37 @@ const Register = () => {
     try {
       setApiError("");
       const result = await postApi("/auth", data);
-      login(result.data);
+      login(result);
       toggleModal();
     } catch (e: any) {
       console.log("Error: ", e?.response?.data || e);
       setApiError(e?.response?.data?.message || "Invalid Credentials");
+    }
+  };
+
+  const onWalletRegister = async () => {
+    try {
+      setApiError("");
+
+      if (!account || !provider) {
+        setApiError("Please connect your wallet first");
+        return;
+      }
+
+      const signature = await provider
+        .getSigner(account)
+        .signMessage("Login Quant Fund");
+
+      const result = await postApi("/api/v1/auth/login-signature", {
+        address: account,
+        signature,
+      });
+
+      login(result);
+      toggleModal();
+    } catch (e: any) {
+      console.log("Error: ", e?.response?.data || e);
+      setApiError(e?.response?.data?.message || "Wallet registration failed");
     }
   };
 
@@ -98,6 +126,13 @@ const Register = () => {
       >
         <GoogleButton height={18} width={18} className="mr-1" />
         Continue with Google
+      </button>
+      <button
+        type="button"
+        className="flex items-center justify-center w-full px-3 py-2 mb-4 bg-white rounded-lg text-[#292D3F] font-inter text-sm text-base"
+        onClick={onWalletRegister}
+      >
+        Register with Wallet
       </button>
       <div className="flex items-center w-full my-4">
         <hr className="flex-grow border-foreground-night-400" />
