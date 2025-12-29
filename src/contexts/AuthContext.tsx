@@ -4,10 +4,34 @@ import Login from "../components/auth/Login";
 import Register from "../components/auth/Register";
 import ForgotPassword from "../components/auth/ForgotPassword";
 import ChangePassword from "../components/auth/Change Password";
+import { ACCESS_TOKEN_LOCAL_STORAGE, WALLET_ADDRESS_LOCAL_STORAGE } from "../constants/common";
+import { getApi } from "../services/axios.service";
+
+const getAddressFromJwt = (token: string): string | null => {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+    const parsed = JSON.parse(atob(padded));
+    return parsed?.address || null;
+  } catch (_e) {
+    return null;
+  }
+};
+
+const unwrapApiData = (input: any) => {
+  if (input && typeof input === "object" && "data" in input) {
+    return (input as any).data;
+  }
+  return input;
+};
 
 export type AuthContextType = {
   user: IUser | null;
   setUser: any;
+  walletAddress: string | null;
+  setWalletAddress: any;
   isAuthenticated: boolean;
   setIsAuthenticated: any;
   toggleModal: any;
@@ -18,6 +42,8 @@ export type AuthContextType = {
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   setUser: () => {},
+  walletAddress: null,
+  setWalletAddress: () => {},
   isAuthenticated: false,
   setIsAuthenticated: () => {},
   toggleModal: () => {},
@@ -70,7 +96,15 @@ const AuthContextProvider = ({ children }: any) => {
   const [showModal, setShowModal] = useState(false);
   const [authAction, setAuthAction] = useState<AuthActionType | null>(null);
   const [user, setUser] = useState<IUser | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(() => {
+    return (
+      localStorage.getItem(WALLET_ADDRESS_LOCAL_STORAGE) ||
+      getAddressFromJwt(localStorage.getItem(ACCESS_TOKEN_LOCAL_STORAGE) || "")
+    );
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem(ACCESS_TOKEN_LOCAL_STORAGE);
+  });
 
   const Component = authAction?.component;
 
@@ -90,12 +124,49 @@ const AuthContextProvider = ({ children }: any) => {
     }
   }, [Component]);
 
+  useEffect(() => {
+    const token = localStorage.getItem(ACCESS_TOKEN_LOCAL_STORAGE);
+    const storedWalletAddress = localStorage.getItem(WALLET_ADDRESS_LOCAL_STORAGE);
+    if (!token) return;
+    if (user) return;
+
+    const nextWalletAddress = storedWalletAddress || getAddressFromJwt(token);
+    if (nextWalletAddress && !walletAddress) {
+      setWalletAddress(nextWalletAddress);
+      localStorage.setItem(WALLET_ADDRESS_LOCAL_STORAGE, nextWalletAddress);
+    }
+
+    setIsAuthenticated(true);
+    (async () => {
+      try {
+        const result: any = await getApi("/api/v1/users/me");
+        const payload = unwrapApiData(result);
+        setUser(payload as any);
+        if (payload?.address) {
+          setWalletAddress(payload.address);
+          localStorage.setItem(WALLET_ADDRESS_LOCAL_STORAGE, payload.address);
+        }
+      } catch (e: any) {
+        const status = e?.response?.status || e?.status;
+        if (status === 401 || status === 403) {
+          localStorage.removeItem(ACCESS_TOKEN_LOCAL_STORAGE);
+          localStorage.removeItem(WALLET_ADDRESS_LOCAL_STORAGE);
+          setUser(null);
+          setWalletAddress(null);
+          setIsAuthenticated(false);
+        }
+      }
+    })();
+  }, [user, walletAddress]);
+
   return (
     <>
       <AuthContext.Provider
         value={{
           user,
           setUser,
+          walletAddress,
+          setWalletAddress,
           isAuthenticated,
           setIsAuthenticated,
           toggleModal,

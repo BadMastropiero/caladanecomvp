@@ -1,21 +1,36 @@
 import { useCallback, useEffect, useContext } from "react";
-import { ACCESS_TOKEN_LOCAL_STORAGE } from "../constants/common";
+import { ACCESS_TOKEN_LOCAL_STORAGE, WALLET_ADDRESS_LOCAL_STORAGE } from "../constants/common";
 import { getApi } from "../services/axios.service";
 import { AuthContext } from "../contexts/AuthContext";
 
+const unwrapApiData = (input: any) => {
+  if (input && typeof input === "object" && "data" in input) {
+    return (input as any).data;
+  }
+  return input;
+};
+
 const useAuth = () => {
-  const { user, setUser, isAuthenticated, setIsAuthenticated } =
+  const { user, setUser, walletAddress, setWalletAddress, isAuthenticated, setIsAuthenticated } =
     useContext(AuthContext);
 
   // Simulate a login action
   const login = (data: any) => {
+    const payload = unwrapApiData(data);
     // Perform login logic, set user data
-    const { access_token = "", ...rest } = data;
-    setUser({ ...rest });
-    console.log("Logged in ::::", data);
-    if (access_token) {
+    const token = payload?.access_token || payload?.authToken || "";
+    const { access_token: _accessToken, authToken: _authToken, ...rest } = payload || {};
+    setUser(payload?.user || { ...rest });
+    console.log("Logged in ::::", payload);
+    if (token) {
       setIsAuthenticated(true);
-      localStorage.setItem(ACCESS_TOKEN_LOCAL_STORAGE, data.access_token);
+      localStorage.setItem(ACCESS_TOKEN_LOCAL_STORAGE, token);
+    }
+
+    const address = payload?.address || payload?.user?.address || rest?.address;
+    if (address) {
+      setWalletAddress(address);
+      localStorage.setItem(WALLET_ADDRESS_LOCAL_STORAGE, address);
     }
   };
 
@@ -24,14 +39,21 @@ const useAuth = () => {
     // Perform logout logic, clear user data
     setUser(null);
     localStorage.removeItem(ACCESS_TOKEN_LOCAL_STORAGE);
+    localStorage.removeItem(WALLET_ADDRESS_LOCAL_STORAGE);
+    setWalletAddress(null);
     setIsAuthenticated(false);
   };
 
   const updateUserInfo = useCallback(async () => {
-    const result = await getApi("/users/me");
+    const result = await getApi("/api/v1/users/me");
+    const payload = unwrapApiData(result);
     setIsAuthenticated(true);
-    setUser(result.data);
-  }, [setIsAuthenticated, setUser]);
+    setUser(payload as any);
+    if ((payload as any)?.address) {
+      setWalletAddress((payload as any).address);
+      localStorage.setItem(WALLET_ADDRESS_LOCAL_STORAGE, (payload as any).address);
+    }
+  }, [setIsAuthenticated, setUser, setWalletAddress]);
 
   useEffect(() => {
     const token = localStorage.getItem(ACCESS_TOKEN_LOCAL_STORAGE);
@@ -46,7 +68,7 @@ const useAuth = () => {
     }
   }, [user, updateUserInfo]);
 
-  return { user, login, logout, isAuthenticated, updateUserInfo };
+  return { user, walletAddress, login, logout, isAuthenticated, updateUserInfo };
 };
 
 export default useAuth;

@@ -3,6 +3,7 @@ import {
   useState,
   createContext,
   useEffect,
+  useRef,
   ReactNode,
   Dispatch,
   SetStateAction,
@@ -17,6 +18,9 @@ import {
   LUMANAGI_PREDICTION_V1_ADDRESS,
 } from "../constants/contract";
 import { useWeb3React } from "@web3-react/core";
+import { coinbaseWallet } from "../connectors/coinbaseWallet";
+import { metaMask } from "../connectors/metaMask";
+import { walletConnect } from "../connectors/walletConnect";
 
 type MetamaskContextType = {
   errorMessage: null | string;
@@ -53,6 +57,53 @@ const MetmaskContextProvider: React.FC<{
 }> = ({ children }) => {
   const [errorMessage, setErrorMessage] = useState<null | string>(null);
   const { provider, chainId } = useWeb3React();
+
+  const eagerTriedRef = useRef(false);
+
+  useEffect(() => {
+    if (eagerTriedRef.current) return;
+    eagerTriedRef.current = true;
+
+    const connectorId = window.localStorage.getItem("connectorId");
+    if (!connectorId) return;
+
+    const connect = async () => {
+      try {
+        if (connectorId === "wallet_connect") {
+          const wc: any = walletConnect as any;
+          if (typeof wc.connectEagerly === "function") {
+            await wc.connectEagerly();
+          } else if (typeof wc.activate === "function") {
+            await wc.activate();
+          }
+          return;
+        }
+
+        if (connectorId === "coinbase") {
+          const cb: any = coinbaseWallet as any;
+          if (typeof cb.connectEagerly === "function") {
+            await cb.connectEagerly();
+          } else if (typeof cb.activate === "function") {
+            await cb.activate();
+          }
+          return;
+        }
+
+        if (connectorId === "injected") {
+          const mm: any = metaMask as any;
+          if (typeof mm.connectEagerly === "function") {
+            await mm.connectEagerly();
+          } else if (typeof mm.activate === "function") {
+            await mm.activate();
+          }
+        }
+      } catch (_e) {
+        // no-op
+      }
+    };
+
+    connect();
+  }, []);
 
   const [balance, setBalance] = useState<null | BigNumber>(null);
 

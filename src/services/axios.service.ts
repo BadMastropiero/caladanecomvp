@@ -1,30 +1,32 @@
 import axios from "axios";
-import { ACCESS_TOKEN_LOCAL_STORAGE } from "../constants/common";
-import { Navigate } from "react-router";
+import { ACCESS_TOKEN_LOCAL_STORAGE, WALLET_ADDRESS_LOCAL_STORAGE } from "../constants/common";
 
 const http = axios.create({
-  baseURL: process.env.REACT_APP_BACKEND_URL,
+  baseURL: (process.env.REACT_APP_BACKEND_URL || "").replace(/\/$/, ""),
 });
 
 http.interceptors.request.use((config) => {
   const token = localStorage.getItem(ACCESS_TOKEN_LOCAL_STORAGE);
 
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers = config.headers || {};
+    config.headers.Authorization = token;
   }
 
   return config;
 });
 
 http.interceptors.response.use(
-  (config) => {
-    return config;
+  (response) => {
+    return response;
   },
   (error) => {
-    if (error.status === 401 || error.response.status === 401) {
+    const status = error?.response?.status || error?.status;
+    if (status === 401 || status === 403) {
       localStorage.removeItem(ACCESS_TOKEN_LOCAL_STORAGE);
-      Navigate({ to: "/" });
-      return;
+      localStorage.removeItem(WALLET_ADDRESS_LOCAL_STORAGE);
+      window.location.assign("/");
+      return Promise.reject(error);
     }
     return Promise.reject(error);
   }
