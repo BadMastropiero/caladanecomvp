@@ -34,7 +34,7 @@ export function Header() {
 
   const handleLogin = () => {
     updateAuthAction(ActionTypes.Login);
-  }; //TODO
+  }; 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -42,15 +42,6 @@ export function Header() {
   const [selectedWallet, setSelectedWallet] = useState<
     "MetaMask" | "WalletConnect" | "Coinbase" | null
   >(null);
-
-  const copyWalletAddress = async () => {
-    if (!buttonAddress) return;
-    try {
-      await navigator.clipboard.writeText(buttonAddress);
-    } catch (_e) {
-      // no-op
-    }
-  };
 
   const goToProtected = (path: string) => {
     setIsUserMenuOpen(false);
@@ -247,7 +238,7 @@ export function Header() {
                 <button
                   type="button"
                   className="w-full rounded-lg px-3 py-2 text-left text-white hover:bg-white/10"
-                  onClick={copyWalletAddress}
+                  onClick={() => goToProtected("/wallet")}
                   title={buttonAddress || ""}
                   disabled={!buttonAddress}
                 >

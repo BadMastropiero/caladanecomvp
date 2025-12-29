@@ -13,6 +13,7 @@ import PrivateRoutes from "./helper/PrivateRoutes";
 import Profile from "./profile/Profile";
 import EditProfile from "./profile/EditProfile";
 import UserSettingsPage from "./profile/UserSettings";
+import UserWalletPage from "./profile/UserWallet";
 
 const Layout = () => {
   return (
@@ -68,6 +69,15 @@ export function Routers() {
           element={
             <PrivateRoutes>
               <UserSettingsPage />
+            </PrivateRoutes>
+          }
+        />
+        
+        <Route
+          path="/wallet"
+          element={
+            <PrivateRoutes>
+              <UserWalletPage />
             </PrivateRoutes>
           }
         />
