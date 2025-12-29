@@ -10,7 +10,8 @@ http.interceptors.request.use((config) => {
 
   if (token) {
     config.headers = config.headers || {};
-    config.headers.Authorization = token;
+    const bearerToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+    config.headers.Authorization = bearerToken;
   }
 
   return config;
