@@ -1,8 +1,14 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 
+function getTokenFromHeader(value) {
+  if (!value || typeof value !== 'string') return null;
+  if (value.startsWith('Bearer ')) return value.slice('Bearer '.length).trim();
+  return value.trim();
+}
+
 function ensureWebToken(req, res, next) {
-  const token = req.headers['authorization'];
+  const token = getTokenFromHeader(req.headers['authorization']);
   if (!token) {
     return res.sendStatus(403);
   }
@@ -24,7 +30,7 @@ function ensureWebToken(req, res, next) {
 }
 
 function ensureWebTokenForAdmin(req, res, next) {
-  const token = req.headers['authorization'];
+  const token = getTokenFromHeader(req.headers['authorization']);
   if (!token) {
     return res.sendStatus(403);
   }
@@ -35,7 +41,7 @@ function ensureWebTokenForAdmin(req, res, next) {
     try {
       const decoded = await jwt.decode(token, { complete: true, json: true });
       req.user = decoded['payload'];
-      if (req.user.role != 'cpadmin') {
+      if (req.user.role !== 'cpadmin') {
         return res.sendStatus(403);
       }
       return next();

@@ -7,6 +7,7 @@ class MockDataService {
   constructor() {
     // Initialize in-memory data stores
     this.users = new Map();
+    this.userSettings = new Map();
     this.wallets = new Map();
     this.stakingPlans = [];
     this.staking = new Map();
@@ -44,6 +45,17 @@ class MockDataService {
       datetime: new Date(),
     });
 
+    this.userSettings.set(adminId, {
+      theme: 'dark',
+      language: 'en',
+      currency: 'USD',
+      timezone: 'UTC',
+      emailNotifications: true,
+      pushNotifications: true,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+
     // Sample regular user
     const userId = 2;
     this.users.set(userId, {
@@ -55,6 +67,17 @@ class MockDataService {
       MBUSD_balance: 25000,
       is_admin: 0,
       datetime: new Date(),
+    });
+
+    this.userSettings.set(userId, {
+      theme: 'dark',
+      language: 'en',
+      currency: 'USD',
+      timezone: 'UTC',
+      emailNotifications: true,
+      pushNotifications: true,
+      created_at: new Date(),
+      updated_at: new Date(),
     });
 
     // Sample wallet
@@ -163,6 +186,40 @@ class MockDataService {
       return { affectedRows: 1 };
     }
     return { affectedRows: 0 };
+  }
+
+  getUserSettings(userId) {
+    const id = parseInt(userId);
+    const existing = this.userSettings.get(id);
+    if (existing) {
+      return { ...existing };
+    }
+
+    const now = new Date();
+    const defaults = {
+      theme: 'dark',
+      language: 'en',
+      currency: 'USD',
+      timezone: 'UTC',
+      emailNotifications: true,
+      pushNotifications: true,
+      created_at: now,
+      updated_at: now,
+    };
+    this.userSettings.set(id, defaults);
+    return { ...defaults };
+  }
+
+  updateUserSettings(userId, settings) {
+    const id = parseInt(userId);
+    const current = this.getUserSettings(id);
+    const updated = {
+      ...current,
+      ...settings,
+      updated_at: new Date(),
+    };
+    this.userSettings.set(id, updated);
+    return { ...updated };
   }
 
   // Wallet operations

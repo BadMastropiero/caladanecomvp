@@ -21,6 +21,14 @@ class UserModel {
     return mockData.createUser(data);
   }
 
+  async getUserSettings(data) {
+    return mockData.getUserSettings(data.user_id);
+  }
+
+  async updateUserSettings(data) {
+    return mockData.updateUserSettings(data.user_id, data.settings);
+  }
+
   async saveReferralTransaction(data, address) {
     const refBalance = parseFloat((data.amount * 5) / 100).toFixed(2);
     return mockData.createReferralTransaction({
