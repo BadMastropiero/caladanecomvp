@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import LumangiLogo from "../assets/images/LumangiLogo.svg";
 import RewardWheel from "../assets/images/RewardWheel.svg";
 
+import Button from "../UI/Button";
 import { useWeb3React } from "@web3-react/core";
 import { useNavigate } from "react-router-dom";
 import ConnectWallet from "./auth/ConnectWallet";
@@ -58,6 +59,11 @@ export function Header() {
       return;
     }
     navigate(path);
+  };
+
+  const openConnectWallet = () => {
+    setIsUserMenuOpen(false);
+    setIsAuthModalOpen(true);
   };
   useEffect(() => {
     if (account && selectedWallet) {
@@ -179,6 +185,14 @@ export function Header() {
           </a>
         </div>
         <div className="flex self-center justify-end space-x-4 justify-self-end ">
+          <Button
+            onClick={openConnectWallet}
+            label={account ? getEllipsisTxt(account, 6) : "Connect Wallet"}
+            color="dangerText"
+            disabled={!!account}
+            customStyle=" w-40 text-ellipsis overflow-hidden whitespace-nowrap "
+            title={account || ""}
+          />
           <div className="relative" ref={userMenuRef}>
             <button
               type="button"
@@ -227,19 +241,6 @@ export function Header() {
                     }}
                   >
                     Register/Login
-                  </button>
-                )}
-
-                {!account && (
-                  <button
-                    type="button"
-                    className="w-full rounded-lg px-3 py-2 text-left text-white hover:bg-white/10"
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      setIsAuthModalOpen(true);
-                    }}
-                  >
-                    Connect Wallet
                   </button>
                 )}
 
