@@ -6,13 +6,7 @@ import ForgotPassword from "../components/auth/ForgotPassword";
 import ChangePassword from "../components/auth/ChangePassword";
 import { ACCESS_TOKEN_LOCAL_STORAGE, WALLET_ADDRESS_LOCAL_STORAGE } from "../constants/common";
 import { getApi } from "../services/axios.service";
-
-const unwrapApiData = (input: any) => {
-  if (input && typeof input === "object" && "data" in input) {
-    return (input as any).data;
-  }
-  return input;
-};
+import { unwrapApiData } from "../utils/api";
 
 export type AuthContextType = {
   user: IUser | null;

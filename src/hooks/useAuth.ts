@@ -2,13 +2,7 @@ import { useCallback, useEffect, useContext } from "react";
 import { ACCESS_TOKEN_LOCAL_STORAGE, WALLET_ADDRESS_LOCAL_STORAGE } from "../constants/common";
 import { getApi } from "../services/axios.service";
 import { AuthContext } from "../contexts/AuthContext";
-
-const unwrapApiData = (input: any) => {
-  if (input && typeof input === "object" && "data" in input) {
-    return (input as any).data;
-  }
-  return input;
-};
+import { unwrapApiData } from "../utils/api";
 
 const useAuth = () => {
   const { user, setUser, walletAddress, setWalletAddress, isAuthenticated, setIsAuthenticated } =
