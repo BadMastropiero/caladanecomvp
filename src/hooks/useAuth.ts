@@ -21,7 +21,6 @@ const useAuth = () => {
     const token = payload?.access_token || payload?.authToken || "";
     const { access_token: _accessToken, authToken: _authToken, ...rest } = payload || {};
     setUser(payload?.user || { ...rest });
-    console.log("Logged in ::::", payload);
     if (token) {
       setIsAuthenticated(true);
       localStorage.setItem(ACCESS_TOKEN_LOCAL_STORAGE, token);
