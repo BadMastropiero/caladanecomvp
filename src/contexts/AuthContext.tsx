@@ -3,7 +3,7 @@ import CustomModal from "../UI/CustomModal";
 import Login from "../components/auth/Login";
 import Register from "../components/auth/Register";
 import ForgotPassword from "../components/auth/ForgotPassword";
-import ChangePassword from "../components/auth/Change Password";
+import ChangePassword from "../components/auth/ChangePassword";
 import { ACCESS_TOKEN_LOCAL_STORAGE, WALLET_ADDRESS_LOCAL_STORAGE } from "../constants/common";
 import { getApi } from "../services/axios.service";
 
