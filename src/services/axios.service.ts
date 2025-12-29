@@ -22,7 +22,7 @@ http.interceptors.response.use(
   },
   (error) => {
     const status = error?.response?.status || error?.status;
-    if (status === 401 || status === 403) {
+    if (status === 401) {
       localStorage.removeItem(ACCESS_TOKEN_LOCAL_STORAGE);
       localStorage.removeItem(WALLET_ADDRESS_LOCAL_STORAGE);
       window.location.assign("/");

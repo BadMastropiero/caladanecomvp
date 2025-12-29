@@ -10,11 +10,11 @@ function getTokenFromHeader(value) {
 function ensureWebToken(req, res, next) {
   const token = getTokenFromHeader(req.headers['authorization']);
   if (!token) {
-    return res.sendStatus(403);
+    return res.sendStatus(401);
   }
   jwt.verify(token, config.JWT_SECRET_KEY, async function (err, _data) {
     if (err) {
-      return res.sendStatus(403);
+      return res.sendStatus(401);
     }
     try {
       const decoded = await jwt.decode(token, { complete: true, json: true });
@@ -24,7 +24,7 @@ function ensureWebToken(req, res, next) {
       req.address = req.user.address;
       return next();
     } catch (_e) {
-      return res.sendStatus(403);
+      return res.sendStatus(401);
     }
   });
 }
@@ -32,11 +32,11 @@ function ensureWebToken(req, res, next) {
 function ensureWebTokenForAdmin(req, res, next) {
   const token = getTokenFromHeader(req.headers['authorization']);
   if (!token) {
-    return res.sendStatus(403);
+    return res.sendStatus(401);
   }
   jwt.verify(token, config.JWT_SECRET_KEY, async function (err, _data) {
     if (err) {
-      return res.sendStatus(403);
+      return res.sendStatus(401);
     }
     try {
       const decoded = await jwt.decode(token, { complete: true, json: true });
@@ -46,7 +46,7 @@ function ensureWebTokenForAdmin(req, res, next) {
       }
       return next();
     } catch (_e) {
-      return res.sendStatus(403);
+      return res.sendStatus(401);
     }
   });
 }

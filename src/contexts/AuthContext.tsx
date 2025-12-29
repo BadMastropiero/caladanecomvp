@@ -169,7 +169,7 @@ const AuthContextProvider = ({ children }: any) => {
         }
       } catch (e: any) {
         const status = e?.response?.status || e?.status;
-        if (status === 401 || status === 403) {
+        if (status === 401) {
           localStorage.removeItem(ACCESS_TOKEN_LOCAL_STORAGE);
           localStorage.removeItem(WALLET_ADDRESS_LOCAL_STORAGE);
           setUser(null);
