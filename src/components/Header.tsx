@@ -84,16 +84,60 @@ export function Header() {
     };
   }, [isUserMenuOpen]);
 
+  type DeactivatableConnector = {
+    deactivate: () => void | Promise<void>;
+  };
+
+  type ResettableConnector = {
+    resetState: () => void | Promise<void>;
+  };
+
+  type ClosableConnector = {
+    close: () => void | Promise<void>;
+  };
+
+  const isDeactivatableConnector = (
+    value: unknown
+  ): value is DeactivatableConnector => {
+    return (
+      typeof value === "object" &&
+      value !== null &&
+      typeof (value as { deactivate?: unknown }).deactivate === "function"
+    );
+  };
+
+  const isResettableConnector = (
+    value: unknown
+  ): value is ResettableConnector => {
+    return (
+      typeof value === "object" &&
+      value !== null &&
+      typeof (value as { resetState?: unknown }).resetState === "function"
+    );
+  };
+
+  const isClosableConnector = (
+    value: unknown
+  ): value is ClosableConnector => {
+    return (
+      typeof value === "object" &&
+      value !== null &&
+      typeof (value as { close?: unknown }).close === "function"
+    );
+  };
+
   const disconnectWallet = async () => {
     try {
       window.localStorage.removeItem("connectorId");
-      if ((connector as any)?.deactivate) {
-        (connector as any).deactivate();
-      } else if ((connector as any)?.resetState) {
-        (connector as any).resetState();
+
+      if (isDeactivatableConnector(connector)) {
+        await connector.deactivate();
+      } else if (isResettableConnector(connector)) {
+        await connector.resetState();
       }
-      if ((connector as any)?.close) {
-        await (connector as any).close();
+
+      if (isClosableConnector(connector)) {
+        await connector.close();
       }
     } catch (_e) {
       // no-op
