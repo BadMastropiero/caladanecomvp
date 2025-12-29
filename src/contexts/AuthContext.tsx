@@ -108,14 +108,35 @@ const AuthContextProvider = ({ children }: any) => {
 
   const Component = authAction?.component;
 
+  const closeModal = () => {
+    setShowModal(false);
+    setAuthAction(null);
+  };
+
   const toggleModal = (status: boolean | null = null) => {
-    setShowModal(status !== null ? status : !showModal);
+    if (status !== null) {
+      if (!status) {
+        closeModal();
+        return;
+      }
+      setShowModal(true);
+      return;
+    }
+
+    setShowModal((prev) => {
+      const next = !prev;
+      if (!next) {
+        setAuthAction(null);
+      }
+      return next;
+    });
   };
 
   const updateAuthAction = (inputAction: string) => {
     setAuthAction(
       AuthActions.find(({ action }) => action === inputAction) as AuthActionType
     );
+    setShowModal(true);
   };
 
   useEffect(() => {
@@ -177,7 +198,7 @@ const AuthContextProvider = ({ children }: any) => {
         {children}
         <CustomModal
           body={Component ? <Component /> : <></>}
-          handleClose={() => setShowModal(false)}
+          handleClose={closeModal}
           open={showModal}
         />
       </AuthContext.Provider>
