@@ -7,19 +7,6 @@ import ChangePassword from "../components/auth/ChangePassword";
 import { ACCESS_TOKEN_LOCAL_STORAGE, WALLET_ADDRESS_LOCAL_STORAGE } from "../constants/common";
 import { getApi } from "../services/axios.service";
 
-const getAddressFromJwt = (token: string): string | null => {
-  try {
-    const payload = token.split(".")[1];
-    if (!payload) return null;
-    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
-    const parsed = JSON.parse(atob(padded));
-    return parsed?.address || null;
-  } catch (_e) {
-    return null;
-  }
-};
-
 const unwrapApiData = (input: any) => {
   if (input && typeof input === "object" && "data" in input) {
     return (input as any).data;
@@ -97,10 +84,7 @@ const AuthContextProvider = ({ children }: any) => {
   const [authAction, setAuthAction] = useState<AuthActionType | null>(null);
   const [user, setUser] = useState<IUser | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(() => {
-    return (
-      localStorage.getItem(WALLET_ADDRESS_LOCAL_STORAGE) ||
-      getAddressFromJwt(localStorage.getItem(ACCESS_TOKEN_LOCAL_STORAGE) || "")
-    );
+    return localStorage.getItem(WALLET_ADDRESS_LOCAL_STORAGE);
   });
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return !!localStorage.getItem(ACCESS_TOKEN_LOCAL_STORAGE);
@@ -147,15 +131,8 @@ const AuthContextProvider = ({ children }: any) => {
 
   useEffect(() => {
     const token = localStorage.getItem(ACCESS_TOKEN_LOCAL_STORAGE);
-    const storedWalletAddress = localStorage.getItem(WALLET_ADDRESS_LOCAL_STORAGE);
     if (!token) return;
     if (user) return;
-
-    const nextWalletAddress = storedWalletAddress || getAddressFromJwt(token);
-    if (nextWalletAddress && !walletAddress) {
-      setWalletAddress(nextWalletAddress);
-      localStorage.setItem(WALLET_ADDRESS_LOCAL_STORAGE, nextWalletAddress);
-    }
 
     setIsAuthenticated(true);
     (async () => {

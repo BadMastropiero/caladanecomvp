@@ -27,7 +27,7 @@ jest.mock("../components/auth/ForgotPassword", () => {
   return Component;
 });
 
-jest.mock("../components/auth/Change Password", () => {
+jest.mock("../components/auth/ChangePassword", () => {
   const Component = () => <div>ChangePassword</div>;
   return Component;
 });

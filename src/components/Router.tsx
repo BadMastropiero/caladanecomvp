@@ -8,7 +8,7 @@ import Header from "./Header";
 import GoogleLogin from "../views/GoogleLogin";
 import GoogleRedirect from "../views/GoogleRedirect";
 import ResetPassword from "./auth/ResetPassword";
-import PublicRoutes from "./helper/PublicRoutes.tsx";
+import PublicRoutes from "./helper/PublicRoutes";
 import PrivateRoutes from "./helper/PrivateRoutes";
 import Profile from "./profile/Profile";
 import EditProfile from "./profile/EditProfile";
